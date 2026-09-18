@@ -1,64 +1,136 @@
-# TechMemory
+<div align="center">
+  <img src="docs/assets/logo.svg" width="96" alt="Logo de TechMemory" />
+  <h1>TechMemory</h1>
+  <p><b>Juego de memoria en Pygame: encuentra los 8 pares de logotipos tecnológicos antes de que pasen 3 minutos.</b></p>
+  <img src="https://img.shields.io/badge/estado-funcional-2ea44f?style=for-the-badge" alt="Estado: funcional" />
+  <img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.10+" />
+  <img src="https://img.shields.io/badge/pygame--ce-2.5-3EA34A?style=for-the-badge" alt="pygame-ce 2.5" />
+  <img src="https://img.shields.io/badge/tests-23%20pytest-2ea44f?style=for-the-badge" alt="23 pruebas pytest" />
+  <a href="https://github.com/Luiss2080/TechMemory/actions/workflows/ci.yml"><img src="https://github.com/Luiss2080/TechMemory/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <p>
+    <a href="#-inicio-rápido">Inicio rápido</a> ·
+    <a href="#-características">Características</a> ·
+    <a href="#%EF%B8%8F-arquitectura">Arquitectura</a> ·
+    <a href="#-pruebas">Pruebas</a> ·
+    <a href="#-lo-que-todavía-no-existe">Limitaciones</a>
+  </p>
+</div>
 
-Juego de memoria en Python con Pygame: se voltean cartas de a dos para encontrar los pares de logotipos tecnológicos antes de que se acabe el tiempo. Nació como proyecto de la asignatura Programación I (Universidad Privada Domingo Savio, Facultad de Ingeniería; estudiantes Carlos Eduardo Salvatierra Chávez, Luis Mario Rocha Vela y Jesús Enrique Salas Espinoza; docente Zambrana Chacón Jaime). El título del juego en el código es "CodePairs".
+**TechMemory** (el título de la ventana es "CodePairs - Juego de memoria") es un juego en el que se
+voltean cartas de a dos para encontrar los pares antes de que se acabe el tiempo.
+Nació como proyecto de la asignatura Programación I (Universidad Privada Domingo
+Savio, Facultad de Ingeniería; estudiantes Carlos Eduardo Salvatierra Chávez, Luis
+Mario Rocha Vela y Jesús Enrique Salas Espinoza; docente Zambrana Chacón Jaime).
+Es un juego de un solo jugador y una sola pantalla: **no** tiene menú, ranking,
+pausa ni niveles.
 
-## Qué hace (verificado en el código y con tests)
+## 🎬 Vista rápida
 
-- Tablero de 4x4 con 8 pares de logotipos; el mazo se baraja en cada partida y cada logotipo aparece exactamente dos veces.
-- Cronómetro en cuenta regresiva de **3 minutos** (180 s; el README anterior decía 2 minutos, era incorrecto). Al llegar a 0 la partida se pierde.
-- Un par distinto queda visible 1 segundo y se vuelve a ocultar; mientras tanto no se aceptan más clics en cartas.
-- Hacer clic dos veces en la misma carta, o en una carta ya acertada, se ignora.
-- Puntaje: 10 puntos por cada carta descubierta (20 por par; máximo 160).
-- Al ganar o perder, el botón inferior permite volver a jugar: se rebaraja y se reinicia tiempo, puntaje y selección.
-- Efectos de sonido (voltear, acierto, fallo, victoria) y música de fondo. Si no hay dispositivo de audio, el juego arranca en silencio.
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/inicio.png" width="320" alt="Pantalla inicial de CodePairs: 16 cartas ocultas, cronómetro 03:00 y botón Iniciar juego" /><br /><sub>Pantalla inicial</sub></td>
+    <td align="center"><img src="docs/screenshots/tablero.png" width="320" alt="Partida en curso: dos pares descubiertos, una carta volteada y 40 puntos" /><br /><sub>Partida en curso (40 puntos)</sub></td>
+  </tr>
+</table>
 
-No existe contador de movimientos ni ranking: no están implementados.
+> Son frames reales del propio juego, generados con `SDL_VIDEODRIVER=dummy` y
+> `pygame.image.save` sin modificar el código (no incluyen el marco de la ventana).
+> Los logotipos que aparecen son los de `Material/`, marcas de terceros: ver
+> [limitaciones](#-lo-que-todavía-no-existe).
 
-## Requisitos e instalación
+## ✨ Características
 
-Python 3.10 o superior.
+| Característica | Detalle |
+|---|---|
+| Tablero 4x4 | 8 pares de logotipos; el mazo se baraja en cada partida y cada logotipo sale exactamente dos veces |
+| Cronómetro | Cuenta regresiva de **3 minutos** (180 s); al llegar a 0 se pierde |
+| Par incorrecto | Queda visible 1 segundo y se oculta; mientras tanto no se aceptan más clics en cartas |
+| Clics ignorados | Repetir la misma carta o pulsar una ya acertada no cuenta |
+| Puntaje | 10 puntos por carta descubierta (20 por par, máximo 160) |
+| Reintento | Al ganar o perder, el botón inferior rebaraja y reinicia tiempo, puntaje y selección |
+| Sonido | Efectos (voltear, acierto, fallo, victoria) y música de fondo; sin dispositivo de audio arranca en silencio |
 
-```bash
-pip install -r requirements.txt
+## 🏗️ Arquitectura
+
+```mermaid
+flowchart LR
+    U["Ratón (clics)"] --> P["Poryecto_Final.py<br/>ventana, dibujo, sonido, eventos"]
+    P -->|"seleccionar / iniciar / actualizar"| L["logica_juego.py<br/>clase Tablero (sin pygame)"]
+    L -->|"estado: espera / jugando / ganado / perdido"| P
+    P --> M["Material/<br/>PNG y WAV"]
+    T["tests/ (pytest)"] --> L
+    T --> M
 ```
 
-`requirements.txt` usa `pygame-ce`, un fork compatible de Pygame (el código no usa nada específico del fork; el `pygame` clásico también debería servir, pero solo se probó `pygame-ce` 2.5.7 con Python 3.14).
+La lógica (`Tablero`, `Carta`) no depende de Pygame: el tiempo se inyecta como
+parámetro `ahora`, lo que la hace determinista y testeable.
 
-## Ejecutar
+<details>
+<summary>Estructura de carpetas</summary>
+
+```text
+Poryecto_Final.py   Ventana, dibujo, sonido y eventos (el nombre conserva el error tipográfico original)
+logica_juego.py     Reglas puras: mazo, jugadas, victoria, tiempo
+Material/           Imágenes y sonidos (clic.wav y wthatsApp.png no se usan)
+tests/              Pruebas con pytest
+docs/               Logo y capturas del README
+```
+
+</details>
+
+## 🚀 Inicio rápido
+
+| Requisito | Versión |
+|---|---|
+| Python | 3.10 o superior |
+| pygame-ce | 2.5+ (`requirements.txt`) |
 
 ```bash
+git clone https://github.com/Luiss2080/TechMemory.git
+cd TechMemory
+pip install -r requirements.txt
 python Poryecto_Final.py
 ```
 
-(El nombre del archivo tiene el error tipográfico original; se conserva para no romper enlaces.) Se ejecuta desde cualquier carpeta: las rutas de `Material/` son relativas al script.
+Se ejecuta desde cualquier carpeta: las rutas de `Material/` son relativas al
+script. Solo se probó `pygame-ce` 2.5.7 con Python 3.14; el `pygame` clásico
+debería servir pero no se verificó. Jugar con pantalla y sonido reales tampoco
+se verificó en esta revisión (solo ejecución sin pantalla).
 
-## Tests
+## 🧪 Pruebas
 
 ```bash
 pip install -r requirements-dev.txt
-python -m pytest -q
+python -m pytest -q        # 23 pruebas (verificado: 23 pasan)
 ```
 
-La lógica del juego (`logica_juego.py`) no depende de Pygame y tiene 20 tests; otros 3 comprueban que los archivos de `Material/` existan con las mayúsculas exactas. En un entorno sin pantalla/sonido usa `SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy`. El workflow de GitHub Actions (`.github/workflows/ci.yml`) ejecuta lo mismo en Python 3.10 y 3.12.
+20 pruebas cubren la lógica pura (`logica_juego.py`) y 3 comprueban que los
+archivos de `Material/` existan con las mayúsculas exactas. Sin pantalla/sonido:
+`SDL_VIDEODRIVER=dummy SDL_AUDIODRIVER=dummy`. El workflow
+`.github/workflows/ci.yml` ejecuta lo mismo en Python 3.10 y 3.12. Las pruebas
+**no** cubren el dibujado ni la interacción real con el ratón.
 
-Los tests **no** cubren el dibujado ni la interacción real con el ratón; esa parte solo se verificó con una ejecución de humo sin pantalla (arranque, clic en "Iniciar", clic en una carta, cierre).
+## 🚧 Lo que todavía no existe
 
-## Estructura
-
-- `Poryecto_Final.py`: ventana, dibujo, sonido y eventos.
-- `logica_juego.py`: reglas puras (mazo, jugadas, victoria, tiempo).
-- `Material/`: imágenes y sonidos. `clic.wav` y `wthatsApp.png` no se usan.
-- `tests/`: pruebas con pytest.
-
-## Limitaciones conocidas
-
-- **Logotipos de terceros:** las imágenes representan marcas de terceros (C++, Chrome, GitHub, Python, Visual Studio Code, Wi-Fi, etc.). No hay constancia en el repositorio de que se tengan permisos ni licencias para redistribuirlas; úsalas solo con fines educativos y reemplázalas antes de cualquier distribución.
-- **Origen del código:** el título de ventana original mencionaba "Memorama en Python - By Parzibyte", lo que indica que la base del código proviene de un tutorial de ese autor; no se ha verificado su licencia ni se conserva atribución formal.
-- **Sonidos:** se desconoce el origen y la licencia de los `.wav`. `FondoPerfect.wav` pesa unos 32 MB, lo que engorda el repositorio.
-- Tablero y duración fijos en el código (no configurables por el usuario).
-- Sin pantalla de menú, sin pausa y sin guardado de resultados.
+- **Logotipos de terceros:** las imágenes representan marcas de terceros (C++,
+  Chrome, GitHub, Python, Visual Studio Code, Wi-Fi, etc.). No hay constancia de
+  permisos ni licencias para redistribuirlas; úsalas solo con fines educativos y
+  reemplázalas antes de cualquier distribución. Las capturas de este README
+  muestran esos mismos logotipos únicamente como parte del juego.
+- **Origen del código:** el título original mencionaba "Memorama en Python - By
+  Parzibyte", lo que indica que la base proviene de un tutorial de ese autor; no
+  se verificó su licencia ni hay atribución formal.
+- **Sonidos:** se desconoce origen y licencia de los `.wav`. `FondoPerfect.wav`
+  pesa unos 32 MB, lo que engorda el repositorio.
+- Tablero y duración fijos en el código (no configurables).
+- Sin menú, sin pausa, sin contador de movimientos, sin ranking ni guardado de resultados.
 - La ventana usa la fuente "Arial black" del sistema; si no existe, Pygame usa una de reemplazo.
 
-## Licencia
+## 📄 Licencia
 
-Este repositorio **no incluye archivo LICENSE**, por lo que por defecto todos los derechos están reservados por sus autores y no se concede permiso de reutilización. Los autores deberían añadir una licencia explícita si desean permitirlo (y resolver antes lo indicado sobre logotipos y sonidos).
+Sin licencia definida: todos los derechos reservados por defecto. Antes de
+añadir una, hay que resolver lo indicado sobre logotipos y sonidos.
+
+<div align="center">
+  <sub>Hecho por Luiss2080 · Python + Pygame</sub>
+</div>
