@@ -1,4 +1,4 @@
-# <<NOMBRE>>
+# TechMemory
 
 Juego de memoria en Python con Pygame: se voltean cartas de a dos para encontrar los pares de logotipos tecnológicos antes de que se acabe el tiempo. Nació como proyecto de la asignatura Programación I (Universidad Privada Domingo Savio, Facultad de Ingeniería; estudiantes Carlos Eduardo Salvatierra Chávez, Luis Mario Rocha Vela y Jesús Enrique Salas Espinoza; docente Zambrana Chacón Jaime). El título del juego en el código es "CodePairs".
 
